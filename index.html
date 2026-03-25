@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>APEX COMMAND CENTER</title>
+<title>APEX COMMAND CENTER — V39</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
 <style>
@@ -16,95 +16,99 @@
 body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg-dark); color: var(--text-primary); overflow: hidden; }
 .main-container { max-width: 100vw; height: 100vh; padding: 15px; display: flex; flex-direction: column; gap: 12px; }
 
-/* ── HEADER ── */
-.header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
-.brand { font-size: 1rem; font-weight: 900; letter-spacing: 1px; color: var(--accent-blue); }
+/* ── KPI WIDGETS ── */
+.quad-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; position: relative; }
+.card h3 { font-size: 0.7rem; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 1.5px; margin-bottom: 8px; font-weight: 800; }
+.val-lg { font-size: 2.8rem; font-weight: 900; line-height: 1; margin-top: 5px; }
 
-/* ── BREATHING EFFECT (INTENSE) ── */
+/* ── BREATHING EFFECT ── */
 .breathing-card {
     border-width: 2px !important;
     animation: intenseBreathe 3s ease-in-out infinite alternate !important;
 }
 @keyframes intenseBreathe {
-    from { 
-        border-color: var(--border); 
-        box-shadow: 0 0 5px rgba(88, 166, 255, 0.1); 
-    }
-    to { 
-        border-color: var(--accent-blue); 
-        box-shadow: 0 0 25px rgba(88, 166, 255, 0.4), inset 0 0 10px rgba(88, 166, 255, 0.1);
-    }
+    from { border-color: var(--border); box-shadow: 0 0 5px rgba(88, 166, 255, 0.1); }
+    to { border-color: var(--accent-blue); box-shadow: 0 0 20px rgba(88, 166, 255, 0.3); }
 }
 
-/* ── LAYOUT ── */
-.quad-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-.main-layout { display: grid; grid-template-columns: 1fr 1.1fr 1fr; gap: 12px; flex: 1; min-height: 0; }
-.card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; position: relative; }
-.card h3 { font-size: 0.65rem; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 1.5px; margin-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 4px; font-weight: 800; }
-.val-lg { font-size: 2.1rem; font-weight: 900; line-height: 1; margin-top: 4px; }
-
-/* ── PERFORMANCE LISTS (REVERTED FORMATTING) ── */
-.rank-item { display: flex; justify-content: space-between; padding: 8px 10px; border-radius: 5px; margin-bottom: 4px; font-size: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.03); }
+/* ── PERFORMANCE LISTS ── */
+.rank-item { display: flex; justify-content: space-between; padding: 8px 10px; border-radius: 5px; margin-bottom: 4px; font-size: 0.8rem; border-bottom: 1px solid rgba(255,255,255,0.03); }
 .top-perf { color: #aff5b4; }
 .crit-perf { color: #ffa19a; }
 
-/* ── DRILL EFFECT ── */
-.err-item { display: flex; justify-content: space-between; padding: 8px 10px; background: rgba(255,255,255,0.02); border-radius: 5px; margin-bottom: 4px; font-size: 0.72rem; border-left: 2px solid var(--accent-red); cursor: pointer; transition: 0.3s; }
-.err-item:hover { background: rgba(248, 81, 73, 0.1); transform: translateX(5px); }
-.err-item.drilled { background: var(--accent-red) !important; color: white; border-left: 5px solid white; transform: scale(1.02); }
+/* ── ERROR LIST & DRILL MODAL ── */
+.err-item { display: flex; justify-content: space-between; padding: 10px 12px; background: rgba(255,255,255,0.03); border-radius: 6px; margin-bottom: 6px; font-size: 0.85rem; border-left: 4px solid var(--accent-red); cursor: pointer; transition: 0.2s; }
+.err-item:hover { background: rgba(248, 81, 73, 0.15); transform: translateX(5px); }
 
-/* ── DUAL LEADERSHIP BUBBLES (BIGGER & SPACED) ── */
+#drillModal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 20000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
+.modal-content { background: var(--bg-card); border: 2px solid var(--accent-blue); width: 600px; padding: 25px; border-radius: 12px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
+.drill-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+.drill-table th { text-align: left; font-size: 0.7rem; color: var(--text-secondary); padding: 8px; border-bottom: 1px solid var(--border); }
+.drill-table td { padding: 10px 8px; font-size: 0.8rem; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.stat-tag { font-size: 0.6rem; font-weight: bold; padding: 2px 6px; border-radius: 3px; text-transform: uppercase; }
+
+/* ── LEADERSHIP BUBBLES ── */
 .leader-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px; flex: 1; }
-.bubble-section { display: flex; flex-direction: column; align-items: center; justify-content: center; }
-.bubble-label { font-size: 0.7rem; font-weight: 900; letter-spacing: 1px; margin-bottom: 10px; color: var(--text-primary); text-shadow: 0 0 5px rgba(0,0,0,0.5); }
+.bubble-section { display: flex; flex-direction: column; align-items: center; }
 .bubble-circle { 
-    width: 105px; height: 105px; border-radius: 50%; border: 3px solid var(--border);
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    background: radial-gradient(circle, rgba(22,27,34,1) 0%, rgba(13,17,23,1) 100%); 
-    position: relative; overflow: hidden; transition: 0.4s;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+    width: 120px; height: 120px; border-radius: 50%; border: 4px solid var(--border); 
+    display: flex; flex-direction: column; align-items: center; justify-content: center; 
+    background: #0d1117; position: relative; overflow: hidden; 
 }
-.bubble-data { position: absolute; width: 100%; padding: 8px; opacity: 0; transition: 0.6s ease; font-size: 0.7rem; text-align: center; }
-.bubble-data.active { opacity: 1; transform: scale(1); }
-
-/* ── FEEDBACK MATRIX ── */
-.matrix-box { flex: 1; width: 100%; position: relative; min-height: 200px; }
+.bubble-data { position: absolute; width: 100%; padding: 8px; opacity: 0; transition: 0.5s; font-size: 0.75rem; text-align: center; }
+.bubble-data.active { opacity: 1; }
 
 #loader { position: fixed; inset: 0; background: var(--bg-dark); z-index: 30000; display: flex; align-items: center; justify-content: center; }
 .spinner { width: 30px; height: 30px; border: 3px solid #30363d; border-top-color: var(--accent-blue); border-radius: 50%; animation: spin 1s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
-select, .btn { background: #21262d; color: white; border: 1px solid var(--border); padding: 5px 10px; border-radius: 6px; font-size: 0.65rem; cursor: pointer; }
+select, .btn { background: #21262d; color: white; border: 1px solid var(--border); padding: 5px 12px; border-radius: 6px; font-size: 0.7rem; cursor: pointer; }
 </style>
 </head>
 <body>
 
 <div id="loader"><div class="spinner"></div></div>
 
+<div id="drillModal" onclick="this.style.display='none'">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <h2 id="drillTitle" style="color:var(--accent-blue); font-size:1.1rem; margin-bottom:10px;">Error Impact Analysis</h2>
+        <div style="max-height: 400px; overflow-y: auto;">
+            <table class="drill-table">
+                <thead>
+                    <tr><th>Agent Name</th><th>Col X</th><th>Col Y</th><th>Col Z</th></tr>
+                </thead>
+                <tbody id="drillBody"></tbody>
+            </table>
+        </div>
+        <button class="btn" style="width:100%; margin-top:20px;" onclick="document.getElementById('drillModal').style.display='none'">DISMISS</button>
+    </div>
+</div>
+
 <div class="main-container">
-    <header class="header">
-        <div class="brand">APEX COMMAND CENTER</div>
+    <header style="display:flex; justify-content:space-between; align-items:center; padding-bottom:10px; border-bottom:1px solid var(--border);">
+        <div style="font-weight:900; color:var(--accent-blue);">APEX COMMAND CENTER</div>
         <div style="display:flex; gap:10px; align-items:center;">
-            <select id="batchFilter" onchange="processDashboard()"><option value="all">All Batches</option></select>
+            <select id="batchFilter" onchange="processDashboard()"><option value="all">CONSOLIDATED VIEW</option></select>
             <button class="btn" onclick="initSync()">RE-SYNC ENGINE</button>
             <div id="lastUpdate" style="font-size:0.6rem; color:var(--text-secondary);">--:--</div>
         </div>
     </header>
 
     <div class="quad-grid">
-        <div class="card" style="border-top: 3px solid var(--accent-green);"><h3>Passed</h3><div class="val-lg" id="outPass" style="color:var(--accent-green)">0</div></div>
-        <div class="card" style="border-top: 3px solid var(--accent-gold);"><h3>Extended</h3><div class="val-lg" id="outExt" style="color:var(--accent-gold)">0</div></div>
-        <div class="card" style="border-top: 3px solid var(--text-secondary);"><h3>Resigned</h3><div class="val-lg" id="outRes" style="color:var(--text-secondary)">0</div></div>
-        <div class="card" style="border-top: 3px solid var(--accent-red);"><h3>Terminated</h3><div class="val-lg" id="outTerm" style="color:var(--accent-red)">0</div></div>
+        <div class="card" style="border-top: 4px solid var(--accent-green);"><h3>Passed</h3><div class="val-lg" id="outPass" style="color:var(--accent-green)">0</div></div>
+        <div class="card" style="border-top: 4px solid var(--accent-gold);"><h3>Extended</h3><div class="val-lg" id="outExt" style="color:var(--accent-gold)">0</div></div>
+        <div class="card" style="border-top: 4px solid var(--text-secondary);"><h3>Resigned</h3><div class="val-lg" id="outRes" style="color:var(--text-secondary)">0</div></div>
+        <div class="card" style="border-top: 4px solid var(--accent-red);"><h3>Terminated</h3><div class="val-lg" id="outTerm" style="color:var(--accent-red)">0</div></div>
     </div>
 
     <div class="quad-grid">
         <div class="card"><h3>Phase 1</h3><div class="val-lg" id="p1">0</div></div>
         <div class="card"><h3>Phase 2</h3><div class="val-lg" id="p2">0</div></div>
         <div class="card"><h3>Phase 3 (PIP)</h3><div class="val-lg" id="p3" style="color:var(--accent-gold)">0</div></div>
-        <div class="card" style="background: rgba(88,166,255,0.03);"><h3>Active Pipeline</h3><div class="val-lg" id="active" style="color:var(--accent-blue)">0</div></div>
+        <div class="card" style="background:rgba(88,166,255,0.03);"><h3>Active Pipeline</h3><div class="val-lg" id="active" style="color:var(--accent-blue)">0</div></div>
     </div>
 
-    <div class="main-layout">
+    <div style="display: grid; grid-template-columns: 1fr 1.1fr 1fr; gap: 12px; flex: 1; min-height: 0;">
         <div class="card">
             <h3>Top 5 Performers</h3>
             <div id="topAgents" style="flex:1"></div>
@@ -113,23 +117,23 @@ select, .btn { background: #21262d; color: white; border: 1px solid var(--border
         </div>
 
         <div style="display: flex; flex-direction: column; gap: 12px;">
-            <div class="card breathing-card" id="matrixCard" style="flex: 1.6;">
+            <div class="card breathing-card" style="flex: 1.6;">
                 <h3>Feedback Matrix (Logs)</h3>
-                <div class="matrix-box"><canvas id="fbChart"></canvas></div>
+                <div style="flex:1;"><canvas id="fbChart"></canvas></div>
             </div>
             <div class="card" style="flex: 1.2;">
                 <h3>Leadership Support</h3>
                 <div class="leader-grid">
                     <div class="bubble-section">
-                        <div class="bubble-label" style="color:var(--accent-blue)">ONGOING</div>
+                        <div style="font-size:0.7rem; font-weight:900; color:var(--accent-blue); margin-bottom:8px;">ONGOING</div>
                         <div class="bubble-circle" id="circleOngoing" style="border-color: var(--accent-blue);">
-                            <div class="val-lg" id="countOngoing" style="color: var(--accent-blue); font-size:1.5rem;">0</div>
+                            <div class="val-lg" id="countOngoing" style="color:var(--accent-blue); font-size:1.8rem;">0</div>
                         </div>
                     </div>
                     <div class="bubble-section">
-                        <div class="bubble-label" style="color:var(--accent-green)">SAFE</div>
+                        <div style="font-size:0.7rem; font-weight:900; color:var(--accent-green); margin-bottom:8px;">SAFE</div>
                         <div class="bubble-circle" id="circleSafe" style="border-color: var(--accent-green);">
-                            <div class="val-lg" id="countSafe" style="color: var(--accent-green); font-size:1.5rem;">0</div>
+                            <div class="val-lg" id="countSafe" style="color:var(--accent-green); font-size:1.8rem;">0</div>
                         </div>
                     </div>
                 </div>
@@ -182,15 +186,24 @@ function processDashboard(isFirstLoad = false) {
     const feedbackRows = batch === 'all' ? rawData.feedback : rawData.feedback.filter(f => String(f.A) === batch);
     const leaderRows = batch === 'all' ? rawData.leadership : rawData.leadership.filter(l => String(l.A) === batch);
 
-    let p1=0, p2=0, p3=0, act=0, errs={}, out={Pass:0, Ext:0, Res:0, Term:0};
+    let p1=0, p2=0, p3=0, act=0, errMap={}, out={Pass:0, Ext:0, Res:0, Term:0};
+    
     agents.forEach(a => {
         const s = String(a.AD).toLowerCase();
         if(s.includes('pass')) out.Pass++; else if(s.includes('extend')) out.Ext++; else if(s.includes('resign')) out.Res++; else if(s.includes('term')) out.Term++;
+        
         if(!s.includes('resigned') && !s.includes('term') && a.B) {
             act++;
             const d = Math.floor((now - new Date(a.B))/86400000);
             if(d <= 7) p1++; else if(d <= 20) p2++; else if(a.AA === 'Yes') p3++;
-            ['N','O','P','Q','R','S','T','U','V','W'].forEach(c => { if(a[c]) errs[a[c]] = (errs[a[c]]||0)+1; });
+            
+            // Populate Error Map with full agent context
+            ['N','O','P','Q','R','S','T','U','V','W'].forEach(c => { 
+                if(a[c]) {
+                    if(!errMap[a[c]]) errMap[a[c]] = [];
+                    errMap[a[c]].push({ name: a.G, x: a.X, y: a.Y, z: a.Z });
+                }
+            });
         }
     });
 
@@ -208,18 +221,29 @@ function processDashboard(isFirstLoad = false) {
     document.getElementById('critAgents').innerHTML = sortedAgents.slice(-5).reverse().map(a => `<div class="rank-item crit-perf"><span>${a.G}</span><b>${a.AC}%</b></div>`).join('');
 
     renderFeedbackMatrix(feedbackRows);
+    initBubbleRotation('circleOngoing', leaderRows.filter(l => l.K === 'Ongoing'), true);
+    initBubbleRotation('circleSafe', leaderRows.filter(l => l.K === 'Safe'), false);
 
-    const ongoing = leaderRows.filter(l => l.K === 'Ongoing');
-    const safe = leaderRows.filter(l => l.K === 'Safe');
-    document.getElementById('countOngoing').textContent = ongoing.length;
-    document.getElementById('countSafe').textContent = safe.length;
-    initBubbleRotation('circleOngoing', ongoing, true);
-    initBubbleRotation('circleSafe', safe, false);
-
-    const sortedErrs = Object.entries(errs).sort((a,b)=>b[1]-a[1]).slice(0, 10);
-    document.getElementById('errorList').innerHTML = sortedErrs.map(([n, c]) => `<div class="err-item" onclick="this.classList.toggle('drilled')"><span>${n}</span><b style="color:var(--accent-red)">${c}</b></div>`).join('');
+    const topErrs = Object.entries(errMap).sort((a,b)=>b[1].length - a[1].length).slice(0, 10);
+    document.getElementById('errorList').innerHTML = topErrs.map(([name, hitList]) => 
+        `<div class="err-item" onclick="openDrill('${name.replace(/'/g, "\\'")}')"><span>${name}</span><b style="color:var(--accent-red)">${hitList.length}</b></div>`).join('');
     
+    window.currentErrMap = errMap; // Global for modal access
     document.getElementById('lastUpdate').textContent = `Sync: ${new Date().toLocaleTimeString()}`;
+}
+
+function openDrill(errName) {
+    const list = window.currentErrMap[errName];
+    document.getElementById('drillTitle').textContent = `Drill Down: ${errName}`;
+    document.getElementById('drillBody').innerHTML = list.map(a => {
+        const getTag = (val) => {
+            const status = String(val).toLowerCase();
+            const color = status.includes('pass') ? 'var(--accent-green)' : 'var(--accent-red)';
+            return `<span class="stat-tag" style="background:${color}; color:#000">${val || 'N/A'}</span>`;
+        };
+        return `<tr><td>${a.name}</td><td>${getTag(a.x)}</td><td>${getTag(a.y)}</td><td>${getTag(a.z)}</td></tr>`;
+    }).join('');
+    document.getElementById('drillModal').style.display = 'flex';
 }
 
 function renderFeedbackMatrix(rows) {
@@ -241,16 +265,12 @@ function renderFeedbackMatrix(rows) {
             datasets: [{
                 data: [counts.TL, counts.QA, counts.Trn],
                 backgroundColor: ['#58a6ff', '#bc8cff', '#ffa657'],
-                borderRadius: 4, 
-                barThickness: 38 
+                borderRadius: 4, barThickness: 38 
             }]
         },
         options: {
             indexAxis: 'y', maintainAspectRatio: false,
-            plugins: { 
-                legend: { display: false },
-                datalabels: { anchor: 'end', align: 'right', color: '#fff', font: { weight: 'bold' } }
-            },
+            plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'right', color: '#fff', font: { weight: 'bold' } } },
             scales: { x: { display: false }, y: { ticks: { color: '#fff', font: { weight: 'bold', size: 12 } }, grid: { display: false } } }
         }
     });
@@ -260,8 +280,9 @@ function initBubbleRotation(containerId, data, isOngoing) {
     const container = document.getElementById(containerId);
     const countDisplay = container.querySelector('.val-lg');
     container.querySelectorAll('.bubble-data').forEach(el => el.remove());
+    document.getElementById(isOngoing ? 'countOngoing' : 'countSafe').textContent = data.length;
     if (data.length === 0) return;
-    data.forEach((l, i) => {
+    data.forEach(l => {
         const div = document.createElement('div');
         div.className = 'bubble-data';
         div.innerHTML = `<b>${l.D}</b><br><span style="font-size:0.6rem; color:var(--text-secondary)">${isOngoing ? 'Agents: ' + (l.G||0) : l.E}</span>`;
@@ -271,21 +292,22 @@ function initBubbleRotation(containerId, data, isOngoing) {
     const rotate = () => {
         const items = container.querySelectorAll('.bubble-data');
         items.forEach(el => el.classList.remove('active'));
-        countDisplay.style.opacity = "0";
-        if (cur === -1) countDisplay.style.opacity = "1";
-        else if(items[cur]) items[cur].classList.add('active');
-        cur++; if (cur >= items.length) cur = -1;
+        countDisplay.style.opacity = (cur === -1) ? "1" : "0";
+        if(items[cur]) items[cur].classList.add('active');
+        cur = (cur >= items.length - 1) ? -1 : cur + 1;
     };
     rotate(); bubbleTimers.push(setInterval(rotate, 4000));
 }
 
 function updateBatchDropdown() {
     const batches = [...new Set(rawData.agents.map(a => String(a.A)).filter(v => v))].sort();
-    document.getElementById('batchFilter').innerHTML = '<option value="all">All Batches</option>' + batches.map(b => `<option value="${b}">BATCH ${b}</option>`).join('');
+    document.getElementById('batchFilter').innerHTML = '<option value="all">CONSOLIDATED VIEW</option>' + batches.map(b => `<option value="${b}">BATCH ${b}</option>`).join('');
 }
+
+// Auto-sync every 5 minutes
+setInterval(() => { console.log("Auto-Syncing..."); initSync(); }, 300000);
 
 window.onload = initSync;
 </script>
 </body>
 </html>
-
