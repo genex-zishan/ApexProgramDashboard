@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>APEX COMMAND CENTER — V38</title>
+<title>APEX COMMAND CENTER</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
 <style>
@@ -84,7 +84,7 @@ select, .btn { background: #21262d; color: white; border: 1px solid var(--border
     <header class="header">
         <div class="brand">APEX COMMAND CENTER</div>
         <div style="display:flex; gap:10px; align-items:center;">
-            <select id="batchFilter" onchange="processDashboard()"><option value="all">CONSOLIDATED VIEW</option></select>
+            <select id="batchFilter" onchange="processDashboard()"><option value="all">All Batches</option></select>
             <button class="btn" onclick="initSync()">RE-SYNC ENGINE</button>
             <div id="lastUpdate" style="font-size:0.6rem; color:var(--text-secondary);">--:--</div>
         </div>
@@ -281,7 +281,7 @@ function initBubbleRotation(containerId, data, isOngoing) {
 
 function updateBatchDropdown() {
     const batches = [...new Set(rawData.agents.map(a => String(a.A)).filter(v => v))].sort();
-    document.getElementById('batchFilter').innerHTML = '<option value="all">CONSOLIDATED VIEW</option>' + batches.map(b => `<option value="${b}">BATCH ${b}</option>`).join('');
+    document.getElementById('batchFilter').innerHTML = '<option value="all">All Batches</option>' + batches.map(b => `<option value="${b}">BATCH ${b}</option>`).join('');
 }
 
 window.onload = initSync;
