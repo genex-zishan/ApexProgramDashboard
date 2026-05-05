@@ -264,7 +264,7 @@ function processDashboard() {
     document.getElementById('errorList').innerHTML = topErrs.map(([n, h]) => `<div onclick="openErrorDrill('${n.replace(/'/g,"\\'")}')" style="cursor:pointer; display:flex; justify-content:space-between; font-size:0.75rem; padding:6px; border-bottom:1px solid rgba(255,255,255,0.05);"><span>${n}</span><b style="color:var(--accent-red)">${h.length}</b></div>`).join('');
     window.currentErrMap = errMap;
 
-    renderFeedbackMatrix(rawData.feedback);
+    renderFeedbackMatrix(rawData.feedback, filter);
     initBubbleRotation('circleOngoing', rawData.leadership.filter(l => l.K === 'Ongoing'), true);
     initBubbleRotation('circleSafe', rawData.leadership.filter(l => l.K === 'Safe'), false);
     document.getElementById('lastUpdate').textContent = `LAST SYNC: ${new Date().toLocaleTimeString()}`;
@@ -286,9 +286,12 @@ function openErrorDrill(errName) {
     document.getElementById('drillModal').style.display = 'flex';
 }
 
-function renderFeedbackMatrix(rows) {
+function renderFeedbackMatrix(rows, filter) {
     const counts = { TL: 0, QA: 0, TRN: 0 };
-    rows.forEach(row => {
+    const filteredRows = (filter && filter !== 'All')
+        ? rows.filter(row => String(row.A).trim() === String(filter).trim())
+        : rows;
+    filteredRows.forEach(row => {
         const r = String(row.D).toUpperCase();
         let k = r.includes('TL') ? 'TL' : r.includes('QA') ? 'QA' : (r.includes('TRAINER') || r.includes('TRN')) ? 'TRN' : null;
         if(k) ['E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','AA','AB','AC','AD','AE','AF','AG','AH','AI','AJ','AK','AL','AM','AN','AO','AP','AQ','AR','AS','AT','AU','AV','AW'].forEach(c => { if(String(row[c]).trim().toLowerCase() === 'provided') counts[k]++; });
